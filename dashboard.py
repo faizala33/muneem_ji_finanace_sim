@@ -5,7 +5,7 @@ import plotly.express as px
 import time
 
 # --- CONFIG ---
-st.set_page_config(page_title="MuneemAI | Onboarding", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="LiquidAI | Onboarding", page_icon="🤖", layout="wide")
 
 # --- CUSTOM CSS ---
 st.markdown("""
@@ -34,7 +34,7 @@ data = load_data()
 # 🛑 STATE 1: USER ONBOARDING (THE FORM)
 # ==========================================
 if not data or not data.get("profile_complete", False):
-    st.title("🚀 Welcome to MuneemAI")
+    st.title("🚀 Welcome to LiquidAI")
     st.markdown("### Let's set up your Financial Autopilot.")
     st.info("Please fill in your details to activate the AI Agent.")
 
@@ -110,8 +110,8 @@ else:
             st.rerun()
 
     # Main Area
-    st.title(f"🤖 MuneemAI Monitor")
-
+    st.title(f"🤖 LiquidAI Monitor")
+    
     # KPIs
     k1, k2, k3, k4 = st.columns(4)
     k1.metric("💸 Cash", f"₹{data['balance_liquid']}")
