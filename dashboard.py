@@ -3,145 +3,178 @@ import json
 import pandas as pd
 import plotly.express as px
 import time
+from streamlit_option_menu import option_menu
 
-# --- CONFIG ---
-st.set_page_config(page_title="MuneemAI | Onboarding", page_icon="🤖", layout="wide")
+# --- PAGE CONFIG ---
+st.set_page_config(page_title="MuneemAI", page_icon="💎", layout="wide")
 
 # --- CUSTOM CSS ---
 st.markdown("""
     <style>
-    .stApp {background-color: #0e1117;}
-    div.stMetric {background-color: #1f2937; padding: 10px; border-radius: 5px; border: 1px solid #374151;}
-    input {background-color: #1f2937; color: white;}
+    .stApp {background-color: #0f172a;}
+    div[data-testid="metric-container"] {
+        background-color: #1e293b;
+        border: 1px solid #334155;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .pending-box {
+        background-color: #451a03;
+        color: #fbbf24;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #d97706;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+    }
+    input {background-color: #334155 !important; color: white !important;}
     </style>
 """, unsafe_allow_html=True)
 
-# --- DATA LOADER ---
 def load_data():
     try:
-        with open('user_data.json', 'r') as f:
-            return json.load(f)
-    except:
-        return None
+        with open('user_data.json', 'r') as f: return json.load(f)
+    except: return None
 
 def save_data(data):
-    with open('user_data.json', 'w') as f:
-        json.dump(data, f, indent=2)
+    with open('user_data.json', 'w') as f: json.dump(data, f, indent=2)
 
 data = load_data()
 
 # ==========================================
-# 🛑 STATE 1: USER ONBOARDING (THE FORM)
+# 🛑 STATE 1: FULL KYC ONBOARDING
 # ==========================================
 if not data or not data.get("profile_complete", False):
-    st.title("🚀 Welcome to MuneemAI")
-    st.markdown("### Let's set up your Financial Autopilot.")
-    st.info("Please fill in your details to activate the AI Agent.")
-
+    st.title("🚀 Initialize MuneemAI")
+    st.markdown("### complete your KYC to activate Financial Autopilot.")
+    
     with st.form("onboarding_form"):
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("#### 👤 Personal Details")
-            full_name = st.text_input("Full Name", placeholder="e.g. Rahul Verma")
-            mobile = st.text_input("Mobile Number", placeholder="+91 9876543210")
-            job = st.text_input("Occupation/Gig", placeholder="e.g. Zomato Rider, Freelancer")
-            pan = st.text_input("PAN Card Number")
+            st.markdown("#### 👤 Personal Info")
+            name = st.text_input("Full Name", placeholder="Rahul Verma")
+            mobile = st.text_input("Mobile Number", placeholder="9876543210")
+            job = st.text_input("Occupation", placeholder="Zomato Rider")
+            pan = st.text_input("PAN Card", placeholder="ABCDE1234F")
 
         with col2:
-            st.markdown("#### 🏦 Banking Details")
-            bank_name = st.text_input("Bank Name", placeholder="e.g. HDFC Bank")
-            ac_no = st.text_input("Account Number")
+            st.markdown("#### 🏦 Bank Details")
+            bank = st.text_input("Bank Name", placeholder="HDFC Bank")
+            acc = st.text_input("Account Number")
             ifsc = st.text_input("IFSC Code")
-            
+        
         st.markdown("---")
-        st.markdown("#### 🎯 Financial Snapshot")
         c3, c4 = st.columns(2)
         with c3:
-            goals = st.text_area("What are your Financial Goals?", placeholder="e.g. Buy a Bike in 6 months, Save for sister's wedding")
+            goal = st.text_area("Financial Goals", placeholder="Buy a bike, Save for wedding")
         with c4:
-            debt = st.text_area("Current Debts / EMIs?", placeholder="e.g. ₹5000 friend loan, ₹2000 Phone EMI")
-            
-        # Initial Balance Injection
-        initial_cash = st.number_input("Current Cash in Hand (₹)", min_value=0, value=1000)
+            debt = st.text_area("Current Debt/EMI", placeholder="Laptop EMI ₹2000")
 
-        submitted = st.form_submit_button("🚀 Activate My Agent")
-        
-        if submitted:
-            if full_name and mobile:
-                # Update Data Object
-                data["profile_complete"] = True
-                data["full_name"] = full_name
-                data["mobile"] = mobile
-                data["job"] = job
-                data["pan_card"] = pan
-                data["bank_name"] = bank_name
-                data["account_number"] = ac_no
-                data["ifsc_code"] = ifsc
-                data["financial_goals"] = goals
-                data["current_debt"] = debt
-                data["balance_liquid"] = initial_cash
-                
-                save_data(data)
-                st.success("Profile Created! Redirecting...")
-                time.sleep(1)
-                st.rerun()
-            else:
-                st.error("Please fill in at least Name and Mobile.")
+        # Hidden defaults for logic
+        if st.form_submit_button("✅ Create Account"):
+            data.update({
+                "profile_complete": True,
+                "full_name": name,
+                "mobile": mobile,
+                "job": job,
+                "pan_card": pan,
+                "bank_name": bank,
+                "account_number": acc,
+                "ifsc_code": ifsc,
+                "financial_goals": goal,
+                "current_debt": debt,
+                "balance_liquid": 1000, # Starting bonus
+                "balance_gold": 0,
+                "balance_mutual_funds": 0,
+                "alerts": ["🎉 Account Created Successfully"],
+                "pending_transaction": None
+            })
+            save_data(data)
+            st.success("KYC Verified! Redirecting...")
+            time.sleep(1)
+            st.rerun()
 
 # ==========================================
 # 🟢 STATE 2: THE MAIN DASHBOARD
 # ==========================================
 else:
-    # Sidebar for Profile View
     with st.sidebar:
-        st.header(f"👤 {data['full_name']}")
+        # Profile Card
+        st.write(f"### 👤 {data['full_name']}")
         st.caption(f"{data['job']} | {data['bank_name']}")
-        st.markdown("---")
-        st.write(f"**📱 Mobile:** {data['mobile']}")
-        st.write(f"**🎯 Goals:** {data['financial_goals']}")
-        st.write(f"**💸 Debt:** {data['current_debt']}")
+        st.caption(f"Acct: **{data['account_number'][-4:]}**")
+        
         st.markdown("---")
         
-        if st.button("🔴 Reset / Edit Profile"):
-            # Wipe data to trigger form again
-            empty_data = {"profile_complete": False, "balance_liquid": 0, "balance_gold": 0, "balance_mutual_funds": 0}
-            save_data(empty_data)
+        selected = option_menu("Menu", ["Overview", "Wallet", "Settings"], 
+            icons=['speedometer', 'wallet', 'gear'], menu_icon="cast", default_index=0,
+            styles={"nav-link-selected": {"background-color": "#3b82f6"}})
+        
+        st.markdown("---")
+        st.markdown("### 🔔 Notifications")
+        if data.get('alerts'):
+            for alert in data['alerts'][:5]:
+                st.info(alert)
+            
+        if st.button("🔴 Factory Reset"):
+            save_data({"profile_complete": False})
             st.rerun()
 
-    # Main Area
-    st.title(f"🤖 MuneemAI Monitor")
+    # --- PENDING APPROVAL ALERT ---
+    if data.get('pending_transaction'):
+        pt = data['pending_transaction']
+        st.markdown(f"""
+        <div class="pending-box">
+            ⚠️ ACTION REQUIRED: Approve Investment of ₹{pt['amount']} in {pt['asset'].upper()}?<br>
+            Reply 'YES' on WhatsApp to confirm.
+        </div>
+        """, unsafe_allow_html=True)
 
-    # KPIs
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric("💸 Cash", f"₹{data['balance_liquid']}")
-    k2.metric("🥇 Gold", f"₹{data['balance_gold']}")
-    k3.metric("📈 Mutual Funds", f"₹{data['balance_mutual_funds']}")
-    
-    net_worth = data['balance_liquid'] + data['balance_gold'] + data['balance_mutual_funds']
-    k4.metric("💰 Net Worth", f"₹{net_worth}")
+    # --- VIEW: OVERVIEW ---
+    if selected == "Overview":
+        k1, k2, k3, k4 = st.columns(4)
+        k1.metric("Liquid Cash", f"₹{data['balance_liquid']}")
+        k2.metric("Gold", f"₹{data['balance_gold']}")
+        k3.metric("Mutual Funds", f"₹{data['balance_mutual_funds']}")
+        k4.metric("Net Worth", f"₹{data['balance_liquid'] + data['balance_gold'] + data['balance_mutual_funds']}")
 
-    # Charts
-    c1, c2 = st.columns([2,1])
-    with c1:
-        st.subheader("Asset Allocation")
-        df = pd.DataFrame({
-            "Asset": ["Cash", "Gold", "Mutual Funds"],
-            "Amount": [data['balance_liquid'], data['balance_gold'], data['balance_mutual_funds']]
-        })
-        fig = px.pie(df, values='Amount', names='Asset', hole=0.5, 
-                     color_discrete_sequence=['#3b82f6', '#f59e0b', '#8b5cf6'], template="plotly_dark")
-        st.plotly_chart(fig, key="pie_chart", use_container_width=True)
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            st.subheader("Income Trend")
+            if data.get('income_history'):
+                df = pd.DataFrame(data['income_history'])
+                fig = px.area(df, x=df.index, y="amount", color_discrete_sequence=['#3b82f6'])
+                fig.update_layout(plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)", font_color="white")
+                st.plotly_chart(fig, use_container_width=True, key="income_chart")
+            else:
+                st.info("No income data yet.")
 
-    with c2:
-        st.subheader("Financial Health")
-        if data['current_debt']:
-            st.warning(f"⚠️ Active Debt: {data['current_debt']}")
-        else:
-            st.success("✅ Debt Free")
-            
-        st.info(f"🎯 Goal: {data['financial_goals']}")
+        with c2:
+            st.subheader("Allocation")
+            df_pie = pd.DataFrame({
+                "Asset": ["Cash", "Gold", "Funds"],
+                "Amount": [data['balance_liquid'], data['balance_gold'], data['balance_mutual_funds']]
+            })
+            fig2 = px.pie(df_pie, values='Amount', names='Asset', hole=0.7, 
+                         color_discrete_sequence=['#3b82f6', '#f59e0b', '#8b5cf6'])
+            fig2.update_layout(showlegend=False, paper_bgcolor="rgba(0,0,0,0)")
+            st.plotly_chart(fig2, use_container_width=True, key="pie_chart")
 
-    # Auto Refresh
+    # --- VIEW: SETTINGS ---
+    elif selected == "Settings":
+        st.header("Profile Settings")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.text_input("Full Name", value=data['full_name'], disabled=True)
+            st.text_input("Mobile", value=data['mobile'], disabled=True)
+            st.text_input("PAN Card", value=data['pan_card'], disabled=True)
+        with c2:
+            st.text_input("Bank", value=data['bank_name'], disabled=True)
+            st.text_input("IFSC", value=data['ifsc_code'], disabled=True)
+            st.text_input("Goal", value=data['financial_goals'], disabled=True)
+
     time.sleep(2)
     st.rerun()
