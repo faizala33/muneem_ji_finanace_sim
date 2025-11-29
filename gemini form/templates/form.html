@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Profile Form - Teal Dark Theme</title>
+    <style>
+        /* High-Contrast Dark Theme Color Palette */
+        :root {
+            --color-background: #0d1117; /* Very Dark, GitHub-like background */
+            --color-card: #161b22;       /* Slightly Lighter Card Background */
+            --color-text-primary: #f0f6fc; /* Bright White Text */
+            --color-text-secondary: #8b949e; /* Muted Gray Text for Labels */
+            --color-accent-teal: #00bcd4;  /* Vibrant Teal Accent */
+            --color-accent-green: #3fb950; /* Submit Button (brighter green) */
+            --color-input-bg: #21262d;    /* Distinct Input Background */
+            --color-border: #30363d;      /* Input Border/Divider Color */
+        }
+
+        /* General Styles and Background */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--color-background);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+            margin: 0;
+            min-height: 100vh;
+            color: var(--color-text-primary);
+        }
+        
+        /* Container and Card Styling */
+        .container {
+            background-color: var(--color-card);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); /* Pronounced shadow */
+            width: 100%;
+            max-width: 700px;
+            border: 1px solid var(--color-border); /* Subtle Card border */
+            border-top: 5px solid var(--color-accent-teal); /* Teal Accent strip */
+        }
+        
+        /* Typography */
+        h2 {
+            text-align: center;
+            color: var(--color-text-primary);
+            margin-bottom: 40px;
+            font-weight: 600;
+            font-size: 1.8em;
+        }
+        
+        /* Section Dividers */
+        .section-title {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid var(--color-accent-teal);
+            color: var(--color-accent-teal);
+            font-size: 1.2em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Form Groups and Labels */
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            font-size: 0.95em;
+        }
+
+        /* Input Fields */
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px; /* Slightly smaller radius for sharper look */
+            box-sizing: border-box;
+            font-size: 15px;
+            color: var(--color-text-primary);
+            background-color: var(--color-input-bg);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus,
+        textarea:focus {
+            border-color: var(--color-accent-teal);
+            box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.5); /* Teal focus ring */
+            background-color: #2b333e; /* Slight contrast change on focus */
+            outline: none;
+        }
+        
+        textarea {
+            resize: vertical;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background-color: var(--color-accent-green);
+            color: var(--color-text-primary);
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background-color: #2ea043; /* Darker green on hover */
+            box-shadow: 0 5px 15px rgba(63, 185, 80, 0.4);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                border-radius: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📊 Complete Your Financial Profile</h2>
+        <form method="POST" action="/">
+            
+            <div class="section-title">👤 Personal Details</div>
+
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" value="Vishal Veerma" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="mobile">Mobile Number</label>
+                <input type="text" id="mobile" name="mobile" value="9326554650" required>
+            </div>
+
+            <div class="form-group">
+                <label for="job">Current Job/Occupation</label>
+                <input type="text" id="job" name="job" value="zomato rider" required>
+            </div>
+
+            <div class="form-group">
+                <label for="pan_card">PAN Card Number</label>
+                <input type="text" id="pan_card" name="pan_card" value="axcpv8721a" required>
+            </div>
+
+            <div class="section-title">🏦 Banking Details</div>
+            
+            <div class="form-group">
+                <label for="bank_name">Bank Name</label>
+                <input type="text" id="bank_name" name="bank_name" value="HDFC" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="account_number">Account Number</label>
+                <input type="text" id="account_number" name="account_number" value="1121212" required>
+            </div>
+
+            <div class="form-group">
+                <label for="ifsc_code">IFSC Code</label>
+                <input type="text" id="ifsc_code" name="ifsc_code" value="1fwd2313" required>
+            </div>
+
+            <div class="section-title">💰 Financial Standing</div>
+
+            <div class="form-group">
+                <label for="balance_liquid">Liquid Cash Balance (₹)</label>
+                <input type="number" id="balance_liquid" name="balance_liquid" value="1000" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="balance_gold">Gold Balance (₹)</label>
+                <input type="number" id="balance_gold" name="balance_gold" value="0" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="balance_mutual_funds">Mutual Funds Balance (₹)</label>
+                <input type="number" id="balance_mutual_funds" name="balance_mutual_funds" value="0" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="current_debt">Current Debt/EMI Details</label>
+                <textarea id="current_debt" name="current_debt" rows="2">laptop emi per month of 2000</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="financial_goals">Financial Goals</label>
+                <textarea id="financial_goals" name="financial_goals" rows="3">Buy an loan in mumbai</textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
