@@ -4,6 +4,7 @@ python-multipart
 python-dotenv
 watchfiles
 twilio
+requests
 streamlit==1.34.0
 streamlit-option-menu
 plotly==5.22.0

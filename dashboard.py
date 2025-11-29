@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import pandas as pd
 import plotly.express as px
+import requests
 import time
 from streamlit_option_menu import option_menu
 
@@ -93,8 +94,17 @@ if not data or not data.get("profile_complete", False):
                 "pending_transaction": None
             })
             save_data(data)
+          # 2. 🚀 TRIGGER WELCOME MESSAGE (The New Magic)
+            try:
+                # Send request to FastAPI (running on localhost)
+                requests.post("http://127.0.0.1:8000/trigger-welcome", 
+                              json={"mobile": mobile, "name": name})
+                st.toast("📲 Welcome Message Sent to WhatsApp!")
+            except Exception as e:
+                st.error(f"Could not send WhatsApp: {e}")
+
             st.success("KYC Verified! Redirecting...")
-            time.sleep(1)
+            time.sleep(2)
             st.rerun()
 
 # ==========================================
