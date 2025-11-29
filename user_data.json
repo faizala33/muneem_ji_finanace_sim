@@ -1,31 +1,22 @@
 {
   "profile_complete": true,
-  "full_name": "vishal Veerma",
-  "mobile": "8879365664",
-  "job": "zomato rider",
-  "pan_card": "axcpv8721a",
-  "bank_name": "HDFC",
-  "account_number": "1121212",
-  "ifsc_code": "1fwd2313",
-  "financial_goals": "Buy home in mumbai ",
+  "full_name": "",
+  "mobile": "",
+  "job": "",
+  "pan_card": "",
+  "bank_name": "",
+  "account_number": "",
+  "ifsc_code": "",
+  "financial_goals": "",
   "current_debt": "",
-  "balance_liquid": 33000,
-  "balance_gold": 7000,
+  "balance_liquid":0 ,
+  "balance_gold": 0,
   "balance_mutual_funds": 0,
   "alerts": [
-    "\ud83c\udf89 Account Created Successfully"
+
   ],
   "pending_transaction": null,
   "income_history": [
-    {
-      "amount": 6000,
-      "source": "Salary",
-      "date": "Today"
-    },
-    {
-      "amount": 33000,
-      "source": "Salary",
-      "date": "Today"
-    }
+   
   ]
 }
