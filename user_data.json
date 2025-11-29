@@ -1,5 +1,5 @@
 {
-  "profile_complete": false,
+  "profile_complete": true,
   "full_name": "",
   "mobile": "",
   "job": "",
@@ -9,8 +9,14 @@
   "ifsc_code": "",
   "financial_goals": "",
   "current_debt": "",
-  "balance_liquid": 0,
+  "balance_liquid":0 ,
   "balance_gold": 0,
   "balance_mutual_funds": 0,
-  "income_history": []
+  "alerts": [
+
+  ],
+  "pending_transaction": null,
+  "income_history": [
+   
+  ]
 }

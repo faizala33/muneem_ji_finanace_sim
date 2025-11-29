@@ -13,6 +13,11 @@ pandas==2.2.2
 
 # --- AI & Logic (The Stable 0.2 Stack) ---
 # We pin these versions to prevent the "pydantic_v1" error
+requests
+streamlit==1.34.0
+streamlit-option-menu
+plotly==5.22.0
+pandas==2.2.2
 langchain==0.2.16
 langchain-community==0.2.16
 langchain-core==0.2.38

@@ -4,145 +4,164 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.tools import tool
 from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 
-# 1. Load Google API Key
 load_dotenv() 
 
-# 2. Database Loader (MUST BE DEFINED FIRST)
 def load_db():
     try:
-        with open('user_data.json', 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        # Default structure matching the new onboarding flow
-        return {
-            "profile_complete": False,
-            "full_name": "User",
-            "balance_liquid": 0, 
-            "balance_gold": 0, 
-            "balance_mutual_funds": 0,
-            "current_debt": "",
-            "financial_goals": ""
-        }
+        with open('user_data.json', 'r') as f: return json.load(f)
+    except FileNotFoundError: return {}
 
-# --- 🛠️ THE TOOLS ---
+# --- 🛠️ TOOLS ---
 
 @tool
 def check_balance():
-    """
-    Returns the current wallet status.
-    Use this when user asks: "How much do I have?", "Can I afford X?", "Balance?".
-    """
+    """Returns wallet status."""
     data = load_db()
     total = data['balance_liquid'] + data['balance_gold'] + data['balance_mutual_funds']
-    return f"Liquid Cash: ₹{data['balance_liquid']}, Gold: ₹{data['balance_gold']}, Mutual Funds: ₹{data['balance_mutual_funds']}. Total Net Worth: ₹{total}"
+    return f"Liquid Cash: ₹{data['balance_liquid']}, Gold: ₹{data['balance_gold']}, MF: ₹{data['balance_mutual_funds']}. Total: ₹{total}"
 
 @tool
 def deposit_income(amount: int, source: str = "Gig Work"):
-    """
-    Call this ONLY when the user explicitly says they EARNED, MADE, or RECEIVED money.
-    Examples: "I made 500", "Got salary", "Received payment".
-    
-    ⚠️ CRITICAL: DO NOT call this if the user is stating a PRICE, COST, or BUDGET.
-    Example: "Bike is 2 lakh" -> DO NOT CALL THIS.
-    """
+    """Use when user EARNS money."""
     data = load_db()
     data['balance_liquid'] += amount
-    
-    # Log it
     if 'income_history' not in data: data['income_history'] = []
     data['income_history'].append({"amount": amount, "source": source, "date": "Today"})
     
-    with open('user_data.json', 'w') as f:
-        json.dump(data, f, indent=2)
-    return f"SUCCESS: Added ₹{amount} to wallet. Current Cash: ₹{data['balance_liquid']}"
+    # Alert
+    if 'alerts' not in data: data['alerts'] = []
+    data['alerts'].insert(0, f"💰 Credit: ₹{amount} from {source}")
+    
+    with open('user_data.json', 'w') as f: json.dump(data, f, indent=2)
+    return f"SUCCESS: Added ₹{amount}. New Cash: ₹{data['balance_liquid']}"
+
+@tool
+def record_expense(amount: int, description: str):
+    """Use when user SPENDS money or PAYS BILLS."""
+    data = load_db()
+    if data['balance_liquid'] < amount:
+        return f"ERROR: Cannot pay ₹{amount}. Cash Balance is only ₹{data['balance_liquid']}."
+    data['balance_liquid'] -= amount
+    with open('user_data.json', 'w') as f: json.dump(data, f, indent=2)
+    return f"SUCCESS: Paid ₹{amount} for {description}. Remaining Cash: ₹{data['balance_liquid']}"
 
 @tool
 def get_market_sentiment():
-    """
-    Returns current market trends. Use this to decide WHERE to invest.
-    """
-    return "Market Status: Gold is Stable (Safe Haven). Mutual Funds are Volatile but have High Return."
+    """Returns market trends."""
+    return "Market Status: Gold is Stable. Mutual Funds are Volatile but High Return."
+
+# --- 🚨 SAFETY TOOLS ---
 
 @tool
-def invest_money(amount: int, asset_class: str):
+def propose_investment(amount: int, asset_class: str):
     """
-    Moves money from Liquid Cash to an Asset.
-    asset_class must be either 'gold' or 'mutual_funds'.
+    Call this when user wants to INVEST. 
+    This does NOT move money. It creates a pending request.
     """
     data = load_db()
-    
     if data['balance_liquid'] < amount:
-        return f"ERROR: Insufficient funds. Wallet only has ₹{data['balance_liquid']}."
+        return f"ERROR: Insufficient funds. Cash: ₹{data['balance_liquid']}."
+    
+    # Create Pending Transaction
+    data['pending_transaction'] = {"amount": amount, "asset": asset_class}
+    
+    with open('user_data.json', 'w') as f: json.dump(data, f, indent=2)
+    return f"PENDING: Investment of ₹{amount} in {asset_class} requires approval. Ask user to confirm."
+
+@tool
+def confirm_transaction():
+    """
+    Call this ONLY if user says 'YES' or 'Confirm'.
+    Executes the pending transaction.
+    """
+    data = load_db()
+    pending = data.get('pending_transaction')
+    
+    if not pending:
+        return "No pending transactions to confirm."
+    
+    amount = pending['amount']
+    asset = pending['asset']
     
     data['balance_liquid'] -= amount
+    if "gold" in asset.lower(): data['balance_gold'] += amount
+    elif "mutual" in asset.lower(): data['balance_mutual_funds'] += amount
     
-    if "gold" in asset_class.lower():
-        data['balance_gold'] += amount
-    elif "mutual" in asset_class.lower() or "fund" in asset_class.lower():
-        data['balance_mutual_funds'] += amount
+    # Clear Pending & Alert
+    data['pending_transaction'] = None
+    if 'alerts' not in data: data['alerts'] = []
+    data['alerts'].insert(0, f"✅ Invested ₹{amount} in {asset}")
     
-    with open('user_data.json', 'w') as f:
-        json.dump(data, f, indent=2)
-        
-    return f"SUCCESS: Invested ₹{amount} in {asset_class}."
+    with open('user_data.json', 'w') as f: json.dump(data, f, indent=2)
+    return f"SUCCESS: Invested ₹{amount} in {asset}."
 
-# --- 🧠 THE BRAIN & DYNAMIC PROMPT ---
+@tool
+def transfer_asset(amount: int, from_asset: str, to_asset: str):
+    """Moves money between assets."""
+    data = load_db()
+    return "Rebalancing requires manual approval for this demo."
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-flash-latest",
-    temperature=0.3
-)
+# --- 🧠 BRAIN SETUP ---
 
-tools = [check_balance, deposit_income, get_market_sentiment, invest_money]
+llm = ChatGoogleGenerativeAI(model="gemini-flash-latest", temperature=0.3)
+
+# UPDATED TOOL LIST
+tools = [check_balance, deposit_income, record_expense, get_market_sentiment, propose_investment, confirm_transaction, transfer_asset]
 
 def get_system_prompt():
-    """Generates a prompt based on the User's Profile in the DB"""
     data = load_db()
-    
-    # Read User Profile from JSON
     user_name = data.get("full_name", "User")
-    user_job = data.get("job", "Gig Worker")
-    user_goals = data.get("financial_goals", "Financial Stability")
     user_debt = data.get("current_debt", "None")
     
-    prompt = f"""
-    You are 'LiquidAI', an Autonomous Wealth Manager for {user_name}.
+    # --- THE FIX IS HERE ---
+    # We construct a clean string without dictionary braces
+    pending = data.get("pending_transaction")
+    if pending:
+        pending_msg = f"⚠️ PENDING APPROVAL: Invest {pending['amount']} in {pending['asset']}"
+    else:
+        pending_msg = "No pending actions."
+    # -----------------------
     
-    USER PROFILE:
-    - Job: {user_job}
-    - Financial Goals: {user_goals}
-    - Current Debt/EMI: {user_debt}
+    return f"""
+    You are 'MuneemAI', an Autonomous Wealth Manager for {user_name}.
+    USER PROFILE: Debt: {user_debt}
+    CURRENT STATE: {pending_msg}
     
-    YOUR RULES:
-    1. **Context:** Always remember their job, debt, and goals when replying.
-    2. **Income vs Cost:** - "I made 5000" -> Call 'deposit_income'.
-       - "Bike costs 5000" -> Call 'check_balance' to see if they can afford it.
-    3. **Investing:** - If they have Debt ({user_debt}), suggest paying that off first.
-       - Otherwise, invest towards their Goal ({user_goals}).
+    RULES:
+    1. **Context Continuity:** - If user says "Yes" / "Confirm", and there is a PENDING action, call 'confirm_transaction'.
+       - If user says "No", say "Cancelled".
     
-    Tone: Professional but friendly financial advisor.
-    """
-    return prompt
+    2. **Handling Money:**
+       - **INCOME:** "I made 500" -> Call 'deposit_income'.
+       - **EXPENSE:** "I spent 500", "Pay EMI" -> Call 'record_expense'.
+       - **INVESTING (CRITICAL):** "Invest 500" -> Call 'propose_investment'. DO NOT call any other tool for investing.
+        - **Rebalancing:** "Move Gold to Funds" -> Call 'transfer_asset'.
 
-def process_user_message(user_input):
+    3. **Strategy:** If user has Debt, warn them. But if they insist on investing, call 'propose_investment'.
+    
+    4. **MAX LENGTH:** Keep replies under 25 words.
+    """
+
+def process_user_message(user_input, chat_history):
     try:
-        # 1. Build the Prompt with latest User Data
-        current_system_prompt = get_system_prompt()
-        
+        current_prompt = get_system_prompt()
         prompt = ChatPromptTemplate.from_messages([
-            ("system", current_system_prompt),
+            ("system", current_prompt),
+            MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{input}"),
             ("placeholder", "{agent_scratchpad}"),
         ])
         
-        # 2. Create Agent
         agent = create_tool_calling_agent(llm, tools, prompt)
         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
         
-        # 3. Run
-        response = agent_executor.invoke({"input": user_input})
+        response = agent_executor.invoke({
+            "input": user_input,
+            "chat_history": chat_history
+        })
         return response["output"]
     except Exception as e:
         return f"Agent Error: {str(e)}"
