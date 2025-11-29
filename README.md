@@ -143,7 +143,7 @@ ssh -p 443 -R0:127.0.0.1:8000 a.pinggy.io
 
 
 ### ** Configure Twilio
-Log in to your Twilio Console.
+Step 1: Log in to your Twilio Console.
 
 On the left sidebar, go to Messaging > Try it out > Send a WhatsApp message.
 
@@ -162,6 +162,19 @@ Paste your Pinggy URL into that box.
 Change the request method to HTTP POST.
 
 Click Save.
+
+Step 2: Get Twilio Credentials (Required for Outbound Messages)
+Up until now, Twilio talked to us. Now we need to talk to Twilio.
+
+Log in to Twilio Console.
+
+On the Dashboard, scroll down to Account Info.
+
+Copy Account SID.
+
+Copy Auth Token.
+
+Update your .env file:
 ---
 
 ## 🎬 **Demo Script (Magic Moments)**
