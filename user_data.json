@@ -1,18 +1,31 @@
 {
-  "profile_complete": false,
-  "full_name": "",
-  "mobile": "",
-  "job": "",
-  "pan_card": "",
-  "bank_name": "",
-  "account_number": "",
-  "ifsc_code": "",
-  "financial_goals": "",
-  "current_debt": "",
-  "balance_liquid": 0,
+  "profile_complete": true,
+  "full_name": "vishal verma",
+  "mobile": "9326554650",
+  "job": "Rapido Driver",
+  "pan_card": "AXCDP8721A",
+  "bank_name": "HDFC",
+  "account_number": "1233423453",
+  "ifsc_code": "efewfeg233",
+  "financial_goals": "To buy a Home in mumbai",
+  "current_debt": "Bike Loan of monthly emi 2000 ",
+  "balance_liquid": 62000,
   "balance_gold": 0,
   "balance_mutual_funds": 0,
-  "income_history": [],
-  "alerts": [],
+  "income_history": [
+    {
+      "amount": 5000,
+      "source": "Unspecified Income",
+      "date": "Today"
+    },
+    {
+      "amount": 60000,
+      "source": "Salary",
+      "date": "Today"
+    }
+  ],
+  "alerts": [
+    "\ud83c\udf89 Account Created Successfully"
+  ],
   "pending_transaction": null
 }
