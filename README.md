@@ -138,9 +138,30 @@ uvicorn server:app --reload
 ### **3️⃣ (Optional) Start Twilio/ngrok Tunnel**
 
 ```bash
-ngrok http 8000
+ssh -p 443 -R0:127.0.0.1:8000 a.pinggy.io
 ```
 
+
+### ** Configure Twilio
+Log in to your Twilio Console.
+
+On the left sidebar, go to Messaging > Try it out > Send a WhatsApp message.
+
+Click the small tab labeled Sandbox Settings (next to the "Sandbox" tab).
+
+The Critical Field: Look for "When a message comes in".
+
+Paste your Pinggy URL into that box.
+
+🚨 ADD THE ENDPOINT: You MUST type /whatsapp at the end of the URL.
+
+✅ Correct: https://r4nd0m-id.a.free.pinggy.link/whatsapp
+
+❌ Wrong: https://r4nd0m-id.a.free.pinggy.link
+
+Change the request method to HTTP POST.
+
+Click Save.
 ---
 
 ## 🎬 **Demo Script (Magic Moments)**
